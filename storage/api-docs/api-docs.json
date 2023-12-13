@@ -1,0 +1,170 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "CDA Laravel API",
+        "description": "API de recettes de cuisine",
+        "contact": {
+            "email": "hamza@garage404.com"
+        },
+        "license": {
+            "name": "Licence API",
+            "url": "https://www.monapi.com/licence"
+        },
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/index": {
+            "get": {
+                "summary": "Index",
+                "operationId": "c0d8ee560d611cdf0b3b30e767031661",
+                "responses": {
+                    "200": {
+                        "description": "Index"
+                    }
+                }
+            }
+        },
+        "/api/recipes": {
+            "get": {
+                "summary": "Liste des recettes",
+                "operationId": "183ea7166b721b122b92da8e3882bbdb",
+                "responses": {
+                    "200": {
+                        "description": "Liste des recettes"
+                    }
+                }
+            }
+        },
+        "/api/recipe/{id}": {
+            "get": {
+                "summary": "Une recette",
+                "operationId": "365cba812bb5a365e77653323d5c64df",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la recette",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Une recette"
+                    }
+                }
+            }
+        },
+        "/api/recipe/add": {
+            "post": {
+                "summary": "Créer une recette",
+                "operationId": "e39997363100e0fc6b9f853efdd4bcad",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "ingredients": {
+                                        "type": "string",
+                                        "example": "Poulet, curry, riz"
+                                    },
+                                    "preparationTime": {
+                                        "type": "string"
+                                    },
+                                    "cookingTime": {
+                                        "type": "string"
+                                    },
+                                    "serves": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Une recette"
+                    }
+                }
+            }
+        },
+        "/api/recipe/modify/{id}": {
+            "put": {
+                "summary": "Modifier une recette",
+                "operationId": "25ac43e67bcecaafb6f05996f073c705",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la recette",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "ingredients": {
+                                        "type": "string",
+                                        "example": "Poulet, curry, riz"
+                                    },
+                                    "preparationTime": {
+                                        "type": "string"
+                                    },
+                                    "cookingTime": {
+                                        "type": "string"
+                                    },
+                                    "serves": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Une recette"
+                    }
+                }
+            }
+        },
+        "/api/recipe/delete/{id}": {
+            "delete": {
+                "summary": "Supprimer une recette",
+                "operationId": "da1c04f0601edea5cd4bfbe69bb3d16f",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la recette",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Une recette"
+                    }
+                }
+            }
+        }
+    }
+}
