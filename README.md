@@ -111,4 +111,92 @@
         - Utiliser la Facade **Config** pour dans la factory pour aller cherche la bonne classe instancier (Utiliser `Config::get(....)` > [How to get values from config files in Laravel with Config facade](https://www.educative.io/answers/how-to-get-values-from-config-files-in-laravel-with-config-facade))
       - Changer le code de la commande afin d'utiliser la factory qui permettra de choisir le bon importer et ainsi executer le code pour importer les données
 
-        
+## Partie 4 Séparation des responsabilités
+
+Nos classes **ImportRecipeFromJson** et **ImportRecipeFromCsv** possède toujours des responsabilités qu'ils ne sont pas sencé avoir.
+Nous allons donc préparer notre couche de persistance des données
+
+- Créer une nouvelle classe appelée **ImporterPersistanceMysql** qui contiendra la logique de code de l'enregistrement en base de données **mysql**
+- Créer l'interface appropriés **ImporterPersistanceInterface**
+- Faire fonctionner l'ensemble à l'aide de l'injection de dépendance toujours en typant à l'aide de l'interface
+
+
+## Partie 5 Création de Job et gestion de la Queue avec les Workers
+
+Arrivé à ce stade il nous reste encore une dernière partie du code à refactoriser.
+Le code executer dans la commande n'est pas censer être dépendant de la commande
+Il va falloir séparer cela en utilisant un Job 
+<details>
+  <summary>
+    <b>
+      <i>Mais comment ça marche les Jobs et la queue ?</i>
+    </b>
+  </summary>
+  
+  ```md
+  Dans Laravel, les **queues** (files d'attente) et les **jobs** (tâches) sont utilisés pour exécuter des tâches en arrière-plan. 
+  Cela permet d'améliorer les performances de l'application en décalant les tâches longues ou intensives en ressources, comme l'envoi d'e-mails ou le traitement d'images, pour qu'elles ne bloquent pas l'exécution du reste de ton application.
+
+  Donc par définition : 
+
+  Les **Jobs** sont des tâches que tu veux exécuter en arrière-plan. Par exemple le chargement de nos recettes en Base de données
+
+  Les **Queues** sont des files d'attente de jobs 
+  - Quand tu crées un job, il est ajouté à la queue.  
+  - Laravel exécute ensuite les jobs de la queue un par un, en arrière-plan. 
+
+  Tu peux avoir plusieurs queues pour organiser tes jobs (par exemple, une queue pour les e-mails, une autre pour le traitement d'import et chargement des données, les traitements des images, etc.).
+  
+  Les **Workers** sont des processus qui exécute les jobs de la queue. 
+  Quand un worker est disponible, il prend le prochain job de la queue et l'exécute. 
+  Si plusieurs workers sont disponibles, ils peuvent exécuter plusieurs jobs en parallèle.
+  ```
+</details>
+
+Avant de commencer cette étape, ils faut paramettrer la gestion de la queue.
+Voici la documentation Laravel pour le faire :
+https://laravel.com/docs/10.x/queues#driver-prerequisites
+
+Pour cet exercice nous allons utiliser notre base de données (database dans la documentation laravel) pour gérer le système de queue.
+
+Mais je vous invite vivement à essayer **Redis** pour gérer vos queues ainsi que vos workers à l'avenir. C'est évidement un meilleur choix en raison de **sa performance**, de **sa fiabilité**, de **ses fonctionnalités avancées** et de **sa meilleure gestion de la concurrence**.
+
+Nous allons donc créer un **Job** au lancement de la commande
+Pour cela créer la classe **ImporterJob** dans un dossier `Job`
+  - Déplacer la logique de code restant de la commande dans le job.
+  - Si vous le souhaitez, ajouter un `sleep(5)` dans votre jobs pour simuler une opération lourde mettant plusieur seconde pour s'executer par notre worker
+
+Au Lancement de la commande :
+- Dispatcher **de manière synchrone** le job pour l'ajouter à une queue
+
+#### **Vérification du lancement du Job et execution de la queue**
+
+Grâce à **laravel telescope** vous allez pouvoir vérifié le lancement des différents Jobs 
+
+#### Execution des workers pour gerer la queue : 
+Laravel possède différentes commande afin de gerer les queues ainsi que les workers :
+ - https://laravel.com/docs/10.x/queues#running-the-queue-worker 
+
+
+Prendre en compte la gestion des jobs-failed (des tâches échouées) :
+
+ - https://laravel.com/docs/10.x/queues#dealing-with-failed-jobs
+
+
+
+### Source pour avoir plus d'information sur les files d'attentes (Queue, Job) et la gestion de la concurrence : 
+- https://www.youtube.com/watch?v=_tP1WXgPSRk&ab_channel=Grafikart.fr
+- https://www.youtube.com/watch?v=j4h0lFswnu4&t=2s&ab_channel=AFUPPHP
+- https://www.youtube.com/watch?v=Xuj-4yFsQzE&ab_channel=Grafikart.fr
+- https://www.youtube.com/watch?v=j4h0lFswnu4&ab_channel=AFUPPHP
+
+
+
+## Partie 6 Evénements et Ecouteurs d'événements
+
+Maintenant que Nous avons créé des jobs s'éxecutant en tâche de fond nous allons nous intérésser au événement.
+  - Créer un évenement **SucceedJobEvent** dans un dossier `app/Events`;
+  - Dispatcher l'événement lorsque le job se termine en utilisant le **AppServiceProvider**.
+
+Pour vérifier que notre événement est bien déclanché créont notre écouteur d'événement ! 
+ - Créer l'écouteur d'événement **SucceedJobEventSubscriber** qui écoutera l'event créé plus tôt et qui enverra un mail à l'administrateur pour le prévenir de la fin du job.
